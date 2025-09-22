@@ -1,0 +1,112 @@
+<!DOCTYPE html> <!-- Declares the document type and version of HTML (HTML5) -->
+<html lang="en"> <!-- Starts the HTML document and sets the language to English -->
+<head> <!-- Metadata and resources go here -->
+    <meta charset="UTF-8"> <!-- Sets character encoding to UTF-8 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- Makes page responsive on all devices -->
+    <title>Security Testing Dashboard</title> <!-- Sets the title shown in the browser tab -->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet"> <!-- Adds TailwindCSS for styling -->
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script> <!-- Loads Axios library for HTTP requests -->
+</head>
+<body class="bg-gray-100"> <!-- Body starts with a light gray background -->
+
+    <div class="container mx-auto px-4 py-8"> <!-- Wrapper with center alignment and padding -->
+        <h1 class="text-4xl font-bold text-center mb-8 text-blue-600">Security Testing Dashboard</h1> <!-- Main title -->
+
+        <!-- SSL Certificate Checker -->
+        <div class="bg-white rounded-lg shadow-lg p-6 mb-6"> <!-- White box with shadow and spacing -->
+            <h2 class="text-2xl font-semibold mb-4">SSL Certificate Checker</h2> <!-- Section title -->
+            <div class="flex gap-4"> <!-- Flexbox layout with space between children -->
+                <input type="text" id="sslDomain" placeholder="Enter domain (e.g., example.com)" 
+                       class="flex-1 p-2 border rounded"> <!-- Text input for domain -->
+                <button onclick="checkSSL()" 
+                        class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                    Check SSL
+                </button> <!-- Button triggers SSL check -->
+            </div>
+            <div id="sslResult" class="mt-4"></div> <!-- Container for displaying SSL result -->
+        </div>
+
+        <!-- DNS Record Analyzer -->
+        <div class="bg-white rounded-lg shadow-lg p-6 mb-6"> <!-- Another section styled like above -->
+            <h2 class="text-2xl font-semibold mb-4">DNS Record Analyzer</h2>
+            <div class="flex gap-4">
+                <input type="text" id="dnsDomain" placeholder="Enter domain (e.g., example.com)" 
+                       class="flex-1 p-2 border rounded">
+                <button onclick="checkDNS()" 
+                        class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
+                    Analyze DNS
+                </button>
+            </div>
+            <div id="dnsResult" class="mt-4"></div>
+        </div>
+
+        <!-- HTTP Headers Security Check -->
+        <div class="bg-white rounded-lg shadow-lg p-6">
+            <h2 class="text-2xl font-semibold mb-4">HTTP Headers Security Check</h2>
+            <div class="flex gap-4">
+                <input type="text" id="headerUrl" placeholder="Enter URL (e.g., https://example.com)" 
+                       class="flex-1 p-2 border rounded">
+                <button onclick="checkHeaders()" 
+                        class="bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600">
+                    Check Headers
+                </button>
+            </div>
+            <div id="headersResult" class="mt-4"></div>
+        </div>
+    </div>
+
+    <script>
+        // 🔒 Function to check SSL certificate
+        async function checkSSL() {
+            const domain = document.getElementById('sslDomain').value; // Get domain input
+            const resultDiv = document.getElementById('sslResult'); // Target result div
+            try {
+                const response = await axios.post('/api/check-ssl', { domain }); // POST to backend API
+                resultDiv.innerHTML = ` <!-- Display result in styled div -->
+                    <div class="bg-gray-100 p-4 rounded">
+                        <p><strong>Valid:</strong> ${response.data.valid}</p>
+                        <p><strong>Days Remaining:</strong> ${response.data.daysRemaining}</p>
+                        <p><strong>Valid From:</strong> ${response.data.validFrom}</p>
+                        <p><strong>Valid To:</strong> ${response.data.validTo}</p>
+                    </div>
+                `;
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="text-red-500">Error: ${error.response?.data?.error || error.message}</div>`; // Error handling
+            }
+        }
+
+        // 🌐 Function to check DNS records
+        async function checkDNS() {
+            const domain = document.getElementById('dnsDomain').value;
+            const resultDiv = document.getElementById('dnsResult');
+            try {
+                const response = await axios.post('/api/check-dns', { domain }); // Call DNS API
+                resultDiv.innerHTML = `
+                    <div class="bg-gray-100 p-4 rounded">
+                        <pre class="whitespace-pre-wrap">${JSON.stringify(response.data, null, 2)}</pre> <!-- Preformatted JSON -->
+                    </div>
+                `;
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="text-red-500">Error: ${error.response?.data?.error || error.message}</div>`;
+            }
+        }
+
+        // 📦 Function to check HTTP headers
+        async function checkHeaders() {
+            const url = document.getElementById('headerUrl').value;
+            const resultDiv = document.getElementById('headersResult');
+            try {
+                const response = await axios.post('/api/check-headers', { url }); // Call headers API
+                let html = '<div class="bg-gray-100 p-4 rounded">';
+                for (const [header, value] of Object.entries(response.data)) {
+                    html += `<p><strong>${header}:</strong> ${value || 'Not set'}</p>`; // Loop through headers
+                }
+                html += '</div>';
+                resultDiv.innerHTML = html; // Show results
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="text-red-500">Error: ${error.response?.data?.error || error.message}</div>`;
+            }
+        }
+    </script>
+</body>
+</html>
