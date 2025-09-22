@@ -2,7 +2,7 @@ const express = require('express'); // Import Express.js framework for node.js.
 const path = require('path'); // Core module to work with file paths
 const sslChecker = require('ssl-checker'); // Library to check SSL certificate info
 const dns = require('dns'); // Built-in DNS module for resolving domains
-const fetch = require('node-fetch'); // Library to make HTTP requests
+const fetch = require('node-fetch'); // Library to make HTTP requests.
 
 const app = express(); // Create Express app instance
 const port = 3000; // Define the port number
