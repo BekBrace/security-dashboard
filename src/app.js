@@ -2,7 +2,7 @@ const express = require('express'); // Import Express.js framework for node.js.
 const path = require('path'); // Core module to work with file paths
 const sslChecker = require('ssl-checker'); // Library to check SSL certificate info
 const dns = require('dns'); // Built-in DNS module for resolving domains
-const fetch = require('node-fetch'); // Library to make HTTP requests.
+const fetch = require('node-fetch'); // Library to make HTTP requests
 
 const app = express(); // Create Express app instance
 const port = 3000; // Define the port number
@@ -46,27 +46,26 @@ app.post('/api/check-dns', async (req, res) => {
     }
 });
 
-// HTTP Headers Security Check endpoint
-app.post('/api/check-headers', async(req, res) =>{
-    try{
-        const {url} = req.body;
-        const response = await fetch(url);
-        const headers = response.headers.raw();
-        const securityHeaders = {
-            'Strict-Transport-Security' : headers['strict-transport-security'] || null,
-            'Strict-Security-Policy' : headers['strict-security-policy'] || null,
-            'X-Frame-Options' : headers['x-frame-options'] || null,
-            'X-Content-Type-Options' : headers['x-content-type-options'] || null,
-            'X-XSS-Protection' : headers['x-xss-protection'] || null,
+/// HTTP Headers Security Check endpoint
+app.post('/api/check-headers', async (req, res) => { // Define POST API endpoint to check HTTP security headers
+    try {
+        const { url } = req.body; // Extract the target URL from the request body
+        const response = await fetch(url); // Make an HTTP request to the provided URL
+        const headers = response.headers.raw(); // Get raw headers object from the response
+        const securityHeaders = { // Extract relevant security-related headers from the response
+            'Strict-Transport-Security': headers['strict-transport-security'] || null, // Enforces HTTPS usage
+            'Strict-Security-Policy': headers['strict-security-policy'] || null, // (Possibly intended as "Content-Security-Policy") sets security restrictions
+            'X-Frame-Options': headers['x-frame-options'] || null, // Prevents clickjacking by controlling iframe embedding
+            'X-Content-Type-Options': headers['x-content-type-options'] || null, // Prevents MIME-type sniffing attacks
+            'X-XSS-Protection': headers['x-xss-protection'] || null, // Enables or disables basic XSS filtering
         };
-        res.json(securityHeaders);
-    } catch(error){
-        res.status(500).json({error: error.message});
+        res.json(securityHeaders); // Return extracted headers as JSON response
+    } catch (error) {
+        res.status(500).json({ error: error.message }); // Send error message if request or processing fails
     }
 });
 
-
 // Start the server
-app.listen(port, () => {
-    console.log(`Security Dashboard running at http://localhost:${port}`); // Server startup message
+app.listen(port, () => { // Start Express server on defined port
+    console.log(`Security Dashboard running at http://localhost:${port}`); // Log startup confirmation with server URL
 });
