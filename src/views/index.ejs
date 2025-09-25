@@ -55,58 +55,61 @@
         </div>
     </div>
 
-    <script>
-        // 🔒 Function to check SSL certificate
-        async function checkSSL() {
-            const domain = document.getElementById('sslDomain').value; // Get domain input
-            const resultDiv = document.getElementById('sslResult'); // Target result div
-            try {
-                const response = await axios.post('/api/check-ssl', { domain }); // POST to backend API
-                resultDiv.innerHTML = ` <!-- Display result in styled div -->
-                    <div class="bg-gray-100 p-4 rounded">
-                        <p><strong>Valid:</strong> ${response.data.valid}</p>
-                        <p><strong>Days Remaining:</strong> ${response.data.daysRemaining}</p>
-                        <p><strong>Valid From:</strong> ${response.data.validFrom}</p>
-                        <p><strong>Valid To:</strong> ${response.data.validTo}</p>
-                    </div>
-                `;
-            } catch (error) {
-                resultDiv.innerHTML = `<div class="text-red-500">Error: ${error.response?.data?.error || error.message}</div>`; // Error handling
-            }
-        }
+    <script> // Begin JavaScript script block
 
-        // 🌐 Function to check DNS records
-        async function checkDNS() {
-            const domain = document.getElementById('dnsDomain').value;
-            const resultDiv = document.getElementById('dnsResult');
-            try {
-                const response = await axios.post('/api/check-dns', { domain }); // Call DNS API
-                resultDiv.innerHTML = `
-                    <div class="bg-gray-100 p-4 rounded">
-                        <pre class="whitespace-pre-wrap">${JSON.stringify(response.data, null, 2)}</pre> <!-- Preformatted JSON -->
-                    </div>
-                `;
-            } catch (error) {
-                resultDiv.innerHTML = `<div class="text-red-500">Error: ${error.response?.data?.error || error.message}</div>`;
-            }
+    // 🔒 Function to check SSL certificate
+    async function checkSSL() { // Define an async function to check SSL certificate details
+        const domain = document.getElementById('sslDomain').value; // Get domain name from input field
+        const resultDiv = document.getElementById('sslResult'); // Reference the div where SSL results will be displayed
+        try {
+            const response = await axios.post('/api/check-ssl', { domain }); // Send POST request with domain to backend SSL-check API
+            resultDiv.innerHTML = ` <!-- Display SSL details in a styled result box -->
+                <div class="bg-gray-100 p-4 rounded">
+                    <p><strong>Valid:</strong> ${response.data.valid}</p> <!-- Show whether SSL is valid -->
+                    <p><strong>Days Remaining:</strong> ${response.data.daysRemaining}</p> <!-- Show remaining days until expiry -->
+                    <p><strong>Valid From:</strong> ${response.data.validFrom}</p> <!-- Show certificate start date -->
+                    <p><strong>Valid To:</strong> ${response.data.validTo}</p> <!-- Show certificate expiry date -->
+                </div>
+            `;
+        } catch (error) {
+            resultDiv.innerHTML = `<div class="text-red-500">Error: ${error.response?.data?.error || error.message}</div>`; // Show error if request fails
         }
+    }
 
-        // 📦 Function to check HTTP headers
-        async function checkHeaders() {
-            const url = document.getElementById('headerUrl').value;
-            const resultDiv = document.getElementById('headersResult');
-            try {
-                const response = await axios.post('/api/check-headers', { url }); // Call headers API
-                let html = '<div class="bg-gray-100 p-4 rounded">';
-                for (const [header, value] of Object.entries(response.data)) {
-                    html += `<p><strong>${header}:</strong> ${value || 'Not set'}</p>`; // Loop through headers
-                }
-                html += '</div>';
-                resultDiv.innerHTML = html; // Show results
-            } catch (error) {
-                resultDiv.innerHTML = `<div class="text-red-500">Error: ${error.response?.data?.error || error.message}</div>`;
-            }
+    // 🌐 Function to check DNS records
+    async function checkDNS() { // Define an async function to check DNS records
+        const domain = document.getElementById('dnsDomain').value; // Get domain name from input field
+        const resultDiv = document.getElementById('dnsResult'); // Reference the div where DNS results will be displayed
+        try {
+            const response = await axios.post('/api/check-dns', { domain }); // Send POST request with domain to backend DNS-check API
+            resultDiv.innerHTML = `
+                <div class="bg-gray-100 p-4 rounded">
+                    <pre class="whitespace-pre-wrap">${JSON.stringify(response.data, null, 2)}</pre> <!-- Display DNS response as pretty-printed JSON -->
+                </div>
+            `;
+        } catch (error) {
+            resultDiv.innerHTML = `<div class="text-red-500">Error: ${error.response?.data?.error || error.message}</div>`; // Show error if request fails
         }
-    </script>
+    }
+
+    // 📦 Function to check HTTP headers
+    async function checkHeaders() { // Define an async function to check HTTP headers
+        const url = document.getElementById('headerUrl').value; // Get URL input value from text field
+        const resultDiv = document.getElementById('headersResult'); // Reference the div where header results will be displayed
+        try {
+            const response = await axios.post('/api/check-headers', { url }); // Send POST request with URL to backend headers-check API
+            let html = '<div class="bg-gray-100 p-4 rounded">'; // Start building result HTML container
+            for (const [header, value] of Object.entries(response.data)) { // Loop through each header and value from API response
+                html += `<p><strong>${header}:</strong> ${value || 'Not set'}</p>`; // Append each header and value (or "Not set" if empty)
+            }
+            html += '</div>'; // Close the HTML result container
+            resultDiv.innerHTML = html; // Insert constructed header results into the result div
+        } catch (error) {
+            resultDiv.innerHTML = `<div class="text-red-500">Error: ${error.response?.data?.error || error.message}</div>`; // Show error if request fails
+        }
+    }
+
+</script> // End JavaScript script block
+
 </body>
 </html>
